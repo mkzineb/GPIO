@@ -1,0 +1,54 @@
+let component = "GPIO"
+let arch = "stm32"
+let license = "GPL"
+let copyright = "University of Toulouse 3"
+let date = "19/05/2023"
+//let name = format("GPIO%c", 'A' + CNUM)
+
+
+type bit = card(1)
+type word = card(32)
+type mode_ = card(2)
+
+/* Declare the modes */
+let INPUT : mode_ = 0b00
+let OUTPUT : mode_ = 0b01
+let ALTERNATE : mode_ = 0b10
+let ANALOG : mode_ = 0b11
+
+reg MODER[1, word] /* define the mode : input, output, alternate function */ 
+  offset = 0x00
+
+reg ODR[1, word]   /* set or read the output */ 
+    offset = 0x14
+
+reg IDR[1, word]   /* provide the current input state of each pin within a GPIO port */ 
+    offset = 0x10
+    readonly = 1
+
+reg BSRR[1, word] /* provide a convenient way to set or clear individual pins within a GPIO port  */
+    offset = 0x18
+
+reg LCKR[1, word] /* enable you to lock or unlock the configuration of individual pins within a GPIO port*/
+  offset = 0x20
+
+let listen = 2
+
+port PIN(16, bit) /*port with 16 pins*/
+    //name = format("P%c%d", CNUM, NUM)
+    on_update = {
+        for i in 0 .. 15 do
+            if MODER<2*i+1 .. 2*i> == OUTPUT then
+                PIN[i] = ODR<i..i>;		
+            endif ;
+        enddo ;
+    }
+    on_input = {
+        for i in 0..15 do
+            if MODER<2*i+1 .. 2*i> == INPUT then
+                IDR<i..i> = PIN[i] ;
+		//PIN[i] = IDR<i..i> ;                
+            endif;
+        enddo ;
+    }
+  
