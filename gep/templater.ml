@@ -60,12 +60,11 @@ type dict_t = (string * value_t) list
 (** Values of a dictionnary *)
 and  value_t =
 	  TEXT of (out_channel -> unit)						(** function called when identifier is found *)
-	| COLL of ((dict_t -> unit) -> dict_t -> unit)		(** collection : argument function must be called for each element
-															with a dictionnary fixed for the current element. *)
+	| COLL of ((dict_t -> unit) -> dict_t -> unit)		(** collection : argument function must be called for each element with a dictionnary fixed for the current element. *)
+	| HEX of (int -> unit)	
 	| BOOL of (unit -> bool)							(** boolean value *)
 	| FUN of (out_channel -> string -> unit)			(** function value *)
-	| GEN_COLL of (string -> (dict_t -> unit) -> dict_t -> unit)
-		(** collection : argument function must be called for each element with a dictionary fixed for the current element. *)
+	| GEN_COLL of (string -> (dict_t -> unit) -> dict_t -> unit)		(** collection : argument function must be called for each element with a dictionary fixed for the current element. *)
 	| GEN_BOOL of (string -> bool)						(** generic boolean symbol *)
 	| GEN_TEXT of (out_channel -> string -> unit)		(** generuc text symbol *)
 
@@ -181,7 +180,7 @@ let do_ifdef dict id =
 		| _ -> false
 	with Not_found -> false
 
-# 185 "templater.ml"
+# 184 "templater.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base =
    "\000\000\242\255\243\255\244\255\001\000\002\000\001\000\001\000\
@@ -579,22 +578,22 @@ let rec scanner out dict state lexbuf =
 and __ocaml_lex_scanner_rec out dict state lexbuf __ocaml_lex_state =
   match Lexing.new_engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 189 "templater.mll"
+# 188 "templater.mll"
    ( output_char out '$'; scanner out dict state lexbuf )
-# 585 "templater.ml"
+# 584 "templater.ml"
 
   | 1 ->
 let
-# 191 "templater.mll"
+# 190 "templater.mll"
                                     id
-# 591 "templater.ml"
+# 590 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_mem.(1)
 and
-# 191 "templater.mll"
+# 190 "templater.mll"
                                                       nl
-# 596 "templater.ml"
+# 595 "templater.ml"
 = Lexing.sub_lexeme lexbuf (lexbuf.Lexing.lex_mem.(1) + 1) lexbuf.Lexing.lex_curr_pos in
-# 192 "templater.mll"
+# 191 "templater.mll"
    (
 		let buf = Buffer.contents (scan_end (Buffer.create 1024) 0 lexbuf) in
 		let f = do_coll dict id in
@@ -602,20 +601,20 @@ and
 		f (fun dict -> scanner out dict FOREACH (Lexing.from_string buf)) dict;
 		scanner out dict state lexbuf
 	)
-# 606 "templater.ml"
+# 605 "templater.ml"
 
   | 2 ->
 let
-# 200 "templater.mll"
+# 199 "templater.mll"
                                id
-# 612 "templater.ml"
+# 611 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_mem.(1)
 and
-# 200 "templater.mll"
+# 199 "templater.mll"
                                                   nl
-# 617 "templater.ml"
+# 616 "templater.ml"
 = Lexing.sub_lexeme lexbuf (lexbuf.Lexing.lex_mem.(1) + 1) lexbuf.Lexing.lex_curr_pos in
-# 201 "templater.mll"
+# 200 "templater.mll"
  (
 		let buf = Buffer.contents (scan_end (Buffer.create 1024) 0 lexbuf) in
 		let f = do_coll dict id in
@@ -623,47 +622,47 @@ and
 		f (fun dict -> scanner out dict WITH (Lexing.from_string buf)) dict;
 		scanner out dict state lexbuf
 	)
-# 627 "templater.ml"
+# 626 "templater.ml"
 
   | 3 ->
 let
-# 209 "templater.mll"
+# 208 "templater.mll"
                             nl
-# 633 "templater.ml"
+# 632 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_curr_pos in
-# 210 "templater.mll"
+# 209 "templater.mll"
  (
 		if nl <> "" then incr line;		
 		if state = TOP then error "extraneous $(end) tag"
 	)
-# 640 "templater.ml"
+# 639 "templater.ml"
 
   | 4 ->
 let
-# 215 "templater.mll"
+# 214 "templater.mll"
                              nl
-# 646 "templater.ml"
+# 645 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_curr_pos in
-# 216 "templater.mll"
+# 215 "templater.mll"
  (
 		if nl <> "" then incr line;
 		if state = THEN then skip out dict 0 lexbuf
 		else failwith "'else' out of 'if'"
 	)
-# 654 "templater.ml"
+# 653 "templater.ml"
 
   | 5 ->
 let
-# 222 "templater.mll"
+# 221 "templater.mll"
                                  id
-# 660 "templater.ml"
+# 659 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_mem.(1)
 and
-# 222 "templater.mll"
+# 221 "templater.mll"
                                                    nl
-# 665 "templater.ml"
+# 664 "templater.ml"
 = Lexing.sub_lexeme lexbuf (lexbuf.Lexing.lex_mem.(1) + 1) lexbuf.Lexing.lex_curr_pos in
-# 223 "templater.mll"
+# 222 "templater.mll"
  (
 		let cond = do_bool dict id in
 		if nl <> "" then incr line;
@@ -671,20 +670,20 @@ and
 		else skip out dict 0 lexbuf;
 		scanner out dict state lexbuf
 	)
-# 675 "templater.ml"
+# 674 "templater.ml"
 
   | 6 ->
 let
-# 231 "templater.mll"
+# 230 "templater.mll"
                              id
-# 681 "templater.ml"
+# 680 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_mem.(1)
 and
-# 231 "templater.mll"
+# 230 "templater.mll"
                                                nl
-# 686 "templater.ml"
+# 685 "templater.ml"
 = Lexing.sub_lexeme lexbuf (lexbuf.Lexing.lex_mem.(1) + 1) lexbuf.Lexing.lex_curr_pos in
-# 232 "templater.mll"
+# 231 "templater.mll"
  (
 		let cond = do_bool dict id in
 		if nl <> "" then incr line;
@@ -692,20 +691,20 @@ and
 		else skip out dict 0 lexbuf;
 		scanner out dict state lexbuf
 	)
-# 696 "templater.ml"
+# 695 "templater.ml"
 
   | 7 ->
 let
-# 240 "templater.mll"
+# 239 "templater.mll"
                                 id
-# 702 "templater.ml"
+# 701 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_mem.(1)
 and
-# 240 "templater.mll"
+# 239 "templater.mll"
                                                   nl
-# 707 "templater.ml"
+# 706 "templater.ml"
 = Lexing.sub_lexeme lexbuf (lexbuf.Lexing.lex_mem.(1) + 1) lexbuf.Lexing.lex_curr_pos in
-# 241 "templater.mll"
+# 240 "templater.mll"
  (
 		let cond = do_ifdef dict id in
 		if nl <> "" then incr line;
@@ -713,20 +712,20 @@ and
 		else skip out dict 0 lexbuf;
 		scanner out dict state lexbuf
 	)
-# 717 "templater.ml"
+# 716 "templater.ml"
 
   | 8 ->
 let
-# 249 "templater.mll"
+# 248 "templater.mll"
                                  id
-# 723 "templater.ml"
+# 722 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_mem.(0) lexbuf.Lexing.lex_mem.(1)
 and
-# 249 "templater.mll"
+# 248 "templater.mll"
                                                    nl
-# 728 "templater.ml"
+# 727 "templater.ml"
 = Lexing.sub_lexeme lexbuf (lexbuf.Lexing.lex_mem.(1) + 1) lexbuf.Lexing.lex_curr_pos in
-# 250 "templater.mll"
+# 249 "templater.mll"
  (
 		let cond = do_ifdef dict id in
 		if nl <> "" then incr line;
@@ -734,42 +733,42 @@ and
 		else skip out dict 0 lexbuf;
 		scanner out dict state lexbuf
 	)
-# 738 "templater.ml"
+# 737 "templater.ml"
 
   | 9 ->
 let
-# 258 "templater.mll"
+# 257 "templater.mll"
                     id
-# 744 "templater.ml"
+# 743 "templater.ml"
 = Lexing.sub_lexeme lexbuf (lexbuf.Lexing.lex_start_pos + 2) (lexbuf.Lexing.lex_curr_pos + -1) in
-# 259 "templater.mll"
+# 258 "templater.mll"
  (	do_text out dict id; scanner out dict state lexbuf )
-# 748 "templater.ml"
+# 747 "templater.ml"
 
   | 10 ->
-# 262 "templater.mll"
+# 261 "templater.mll"
  ( comment out dict state lexbuf )
-# 753 "templater.ml"
+# 752 "templater.ml"
 
   | 11 ->
-# 265 "templater.mll"
+# 264 "templater.mll"
  ( incr line; output_char out '\n'; scanner out dict state lexbuf )
-# 758 "templater.ml"
+# 757 "templater.ml"
 
   | 12 ->
 let
-# 266 "templater.mll"
+# 265 "templater.mll"
        c
-# 764 "templater.ml"
+# 763 "templater.ml"
 = Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
-# 267 "templater.mll"
+# 266 "templater.mll"
  ( output_char out c; scanner out dict state lexbuf )
-# 768 "templater.ml"
+# 767 "templater.ml"
 
   | 13 ->
-# 270 "templater.mll"
+# 269 "templater.mll"
  ( () )
-# 773 "templater.ml"
+# 772 "templater.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_scanner_rec out dict state lexbuf __ocaml_lex_state
@@ -779,14 +778,14 @@ and comment out dict state lexbuf =
 and __ocaml_lex_comment_rec out dict state lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 274 "templater.mll"
+# 273 "templater.mll"
   ( incr line; scanner out dict state lexbuf )
-# 785 "templater.ml"
+# 784 "templater.ml"
 
   | 1 ->
-# 276 "templater.mll"
+# 275 "templater.mll"
   ( comment out dict state lexbuf )
-# 790 "templater.ml"
+# 789 "templater.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_comment_rec out dict state lexbuf __ocaml_lex_state
@@ -796,55 +795,55 @@ and skip out dict cnt lexbuf =
 and __ocaml_lex_skip_rec out dict cnt lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 280 "templater.mll"
+# 279 "templater.mll"
    ( skip out dict cnt lexbuf )
-# 802 "templater.ml"
+# 801 "templater.ml"
 
   | 1 ->
-# 282 "templater.mll"
+# 281 "templater.mll"
    ( skip out dict (cnt + 1) lexbuf )
-# 807 "templater.ml"
+# 806 "templater.ml"
 
   | 2 ->
-# 284 "templater.mll"
+# 283 "templater.mll"
  ( skip out dict (cnt + 1) lexbuf )
-# 812 "templater.ml"
+# 811 "templater.ml"
 
   | 3 ->
-# 286 "templater.mll"
+# 285 "templater.mll"
  ( skip out dict (cnt + 1) lexbuf )
-# 817 "templater.ml"
+# 816 "templater.ml"
 
   | 4 ->
-# 288 "templater.mll"
+# 287 "templater.mll"
  ( skip out dict (cnt + 1) lexbuf )
-# 822 "templater.ml"
+# 821 "templater.ml"
 
   | 5 ->
-# 290 "templater.mll"
+# 289 "templater.mll"
  ( if cnt = 0 then () else skip out dict (cnt -1) lexbuf )
-# 827 "templater.ml"
+# 826 "templater.ml"
 
   | 6 ->
-# 292 "templater.mll"
+# 291 "templater.mll"
  (	if cnt = 0 then scanner out dict ELSE lexbuf
 		else skip out dict cnt lexbuf )
-# 833 "templater.ml"
+# 832 "templater.ml"
 
   | 7 ->
-# 295 "templater.mll"
+# 294 "templater.mll"
  ( incr line; skip out dict cnt lexbuf )
-# 838 "templater.ml"
+# 837 "templater.ml"
 
   | 8 ->
-# 297 "templater.mll"
+# 296 "templater.mll"
  ( skip out dict cnt lexbuf )
-# 843 "templater.ml"
+# 842 "templater.ml"
 
   | 9 ->
-# 299 "templater.mll"
+# 298 "templater.mll"
  ( failwith "unclosed if" )
-# 848 "templater.ml"
+# 847 "templater.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_skip_rec out dict cnt lexbuf __ocaml_lex_state
@@ -855,91 +854,91 @@ and __ocaml_lex_scan_end_rec buf cnt lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
 let
-# 303 "templater.mll"
+# 302 "templater.mll"
           s
-# 861 "templater.ml"
+# 860 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos (lexbuf.Lexing.lex_start_pos + 2) in
-# 304 "templater.mll"
+# 303 "templater.mll"
    ( Buffer.add_string buf s; scan_end buf cnt lexbuf )
-# 865 "templater.ml"
+# 864 "templater.ml"
 
   | 1 ->
 let
-# 305 "templater.mll"
+# 304 "templater.mll"
                               s
-# 871 "templater.ml"
+# 870 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 306 "templater.mll"
+# 305 "templater.mll"
  ( Buffer.add_string buf s; scan_end buf (cnt + 1) lexbuf )
-# 875 "templater.ml"
+# 874 "templater.ml"
 
   | 2 ->
 let
-# 307 "templater.mll"
+# 306 "templater.mll"
                          s
-# 881 "templater.ml"
+# 880 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 308 "templater.mll"
+# 307 "templater.mll"
  ( Buffer.add_string buf s; scan_end buf (cnt + 1) lexbuf )
-# 885 "templater.ml"
+# 884 "templater.ml"
 
   | 3 ->
 let
-# 309 "templater.mll"
+# 308 "templater.mll"
                             s
-# 891 "templater.ml"
+# 890 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 310 "templater.mll"
+# 309 "templater.mll"
  ( Buffer.add_string buf s; scan_end buf (cnt + 1) lexbuf )
-# 895 "templater.ml"
+# 894 "templater.ml"
 
   | 4 ->
 let
-# 311 "templater.mll"
+# 310 "templater.mll"
                              s
-# 901 "templater.ml"
+# 900 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 312 "templater.mll"
+# 311 "templater.mll"
  ( Buffer.add_string buf s; scan_end buf (cnt + 1) lexbuf )
-# 905 "templater.ml"
+# 904 "templater.ml"
 
   | 5 ->
 let
-# 313 "templater.mll"
+# 312 "templater.mll"
                      s
-# 911 "templater.ml"
+# 910 "templater.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 314 "templater.mll"
+# 313 "templater.mll"
  ( if cnt = 0 then buf
 	else (Buffer.add_string buf s; scan_end buf (cnt - 1) lexbuf) )
-# 916 "templater.ml"
+# 915 "templater.ml"
 
   | 6 ->
-# 317 "templater.mll"
+# 316 "templater.mll"
  ( incr line; Buffer.add_char buf '\n'; scan_end buf cnt lexbuf )
-# 921 "templater.ml"
+# 920 "templater.ml"
 
   | 7 ->
 let
-# 318 "templater.mll"
+# 317 "templater.mll"
        c
-# 927 "templater.ml"
+# 926 "templater.ml"
 = Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
-# 319 "templater.mll"
+# 318 "templater.mll"
  ( Buffer.add_char buf c; scan_end buf cnt lexbuf )
-# 931 "templater.ml"
+# 930 "templater.ml"
 
   | 8 ->
-# 321 "templater.mll"
+# 320 "templater.mll"
  ( failwith "unclosed foreach" )
-# 936 "templater.ml"
+# 935 "templater.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_scan_end_rec buf cnt lexbuf __ocaml_lex_state
 
 ;;
 
-# 324 "templater.mll"
+# 323 "templater.mll"
  
 (** Perform a template generation.
 	@param dict		Dictionnary to use.
@@ -963,4 +962,4 @@ let generate_path dict in_path out_path =
 let generate dict template out_path =
 	generate_path dict (Irg.native_path (Config.source_dir ^ "/templates/" ^ template)) out_path
 
-# 967 "templater.ml"
+# 966 "templater.ml"

@@ -59,12 +59,11 @@ type dict_t = (string * value_t) list
 (** Values of a dictionnary *)
 and  value_t =
 	  TEXT of (out_channel -> unit)						(** function called when identifier is found *)
-	| COLL of ((dict_t -> unit) -> dict_t -> unit)		(** collection : argument function must be called for each element
-															with a dictionnary fixed for the current element. *)
+	| COLL of ((dict_t -> unit) -> dict_t -> unit)		(** collection : argument function must be called for each element with a dictionnary fixed for the current element. *)
+	| HEX of (int -> unit)	
 	| BOOL of (unit -> bool)							(** boolean value *)
 	| FUN of (out_channel -> string -> unit)			(** function value *)
-	| GEN_COLL of (string -> (dict_t -> unit) -> dict_t -> unit)
-		(** collection : argument function must be called for each element with a dictionary fixed for the current element. *)
+	| GEN_COLL of (string -> (dict_t -> unit) -> dict_t -> unit)		(** collection : argument function must be called for each element with a dictionary fixed for the current element. *)
 	| GEN_BOOL of (string -> bool)						(** generic boolean symbol *)
 	| GEN_TEXT of (out_channel -> string -> unit)		(** generuc text symbol *)
 

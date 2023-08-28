@@ -125,6 +125,8 @@ and sym_stateless cc id =
 	| Irg.MEM _
 	| Irg.REG _
 		-> false
+	| Irg.PORT _
+		-> false
 	| Irg.LET _
 	| Irg.VAR _
 	| Irg.PARAM (_, Irg.TYPE_EXPR _)

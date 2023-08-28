@@ -53,15 +53,12 @@ gliss-attr: ../irg/irg.cma libgep.cma
 USED_REGS_SOURCES = \
 	gliss_used_regs.ml
 
-gliss-used-regs_LIBS = str unix ../irg/irg ../optirg/liboptirg libgep
-$(eval $(call ocaml_prog,gliss-used-regs,$(USED_REGS_SOURCES)))
-gliss-used-regs: ../irg/irg.cma libgep.cma
 
 # gliss-csim build
 CSIM_SOURCES = \
-    dictGpio.ml
+    dictionnary.ml
 
-gliss-csim_LIBS = str unix ../irg/irg libgep
+gliss-csim_LIBS = str unix ../irg/irg ../optirg/liboptirg libgep
 $(eval $(call ocaml_prog,gliss-csim,$(CSIM_SOURCES)))
 gliss-csim: ../irg/irg.cma libgep.cma
 
