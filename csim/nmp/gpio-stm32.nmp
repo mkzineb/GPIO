@@ -1,0 +1,66 @@
+let component = "GPIO"
+let arch = "stm32"
+let license = "GPL"
+let copyright = "University of Toulouse 3"
+let date = "19/05/2023"
+let name = format("GPIO%c", 'A' + CNUM)
+
+/**/
+type bit = card(1)
+type word = card(32)
+type mode = card(2)
+
+/* Declare the modes */
+let IN: mode = 0b00
+let OUT: mode = 0b01
+
+reg MODER(1, word) /* define the PIN mode : input, output, alternate function */ 
+    offset = 0x00
+
+reg ODR(1, word)   /* set or read the out */ 
+    offset = 0x14
+
+reg IDR(1, word)   /* provide the current input state of each pin within a GPIO port */ 
+    offset = 0x10
+    readonly = 1
+
+reg OTYPER(1, word) /* Defines the configuration, can be push-pull or open-drain */ 
+    offset = 0x04
+
+reg OSPEEDR(1, word) /*  Defines the speed of the pin, can be low, medium or high speed */
+    offset = 0x08
+
+reg PUPDR(1, word)   /* Defines the pins pull configuration, can be pull-up, pull-down or none */           
+    offset = 0x0C
+
+reg AFRL(1, word)   /*  alternate function low register */
+    offset = Ox20
+
+reg AFRH(1, word)  /*  alternate function high register */
+    offset = 0x24
+    
+reg ASCR(1, word)  /*  port analog switch control register*/
+    offset = 
+
+reg BSRR(1, word) /* provide a convenient way to set or clear individual pins within a GPIO port */ 
+    offset = 
+    
+reg LCKR(1, word) /* enable you to lock or unlock the configuration of individual pins within a GPIO port */
+    offset = 
+
+port PIN(16, bit)
+    name = format("P%c%d", CNUM, NUM)
+    on_update = {
+        for i in 0 .. 15 do
+            if MODER<2i+1 .. 2i> == OUT then
+                PIN[i] = ODR<i..i>;
+            else
+                listen PIN[i];
+            endif;
+        enddone;
+    }
+    on_input = {
+        for i in 0..15 do
+            IDR<i..i> = PIN[i];
+        enddo;
+    }

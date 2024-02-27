@@ -1,0 +1,117 @@
+====== GLISS Components =====
+
+This GLISS extensions allows representing in GLISS peripheral drivers like PIO, PWM, USART, etc.
+
+===== SimNML Extension =====
+
+spec		::=	...
+			|	port-spec
+			|	event-spec
+
+port-spec	::=	"port" ID "[" type "," expr "]" attribute*
+event-spec	::= "event ID ("[" expr "]")? attribute*
+
+stmt		::=	...
+			|	"schedule" eid: ID (eix: "[" expr "]")? "at" date: expr ("of" cid; ID ("[" cix: expr "]")?)?
+			|	"cancel" id: ID ("[" ix: expr "]")?
+			|	"trigger" ID ("[" expr "]")?
+			|	"mute" ID ("[" expr "]")?
+
+type		::=	...
+			|	"clock"
+			|	"serial"
+
+
+The "schedule" command schedule the event named "eid" (possibly with the index
+"eix"). This event will be programmed to trigger at "data" (in unit of the 
+board clock or of clock "cid", index "cix"). "eid" must be an event identifier
+and "cix" must a port identifier of type clock.
+
+The "cancel" command allows to cancel a scheduled event. "id" must be the name
+of the event and "ix" the index of the event.
+
+The "trigger" command triggers an event 
+
+
+===== Special constants =====
+
+* "NAME": STRING — component name
+* "ARCH": STRING — architecture embedding it
+* "BUILDER": STRING — designer
+* "LICENSE": STRING — license
+* "VERSION": STRING — version
+* "URL": STRING — URL to retrieve information about the component
+
+===== Register Attributes =====
+
+* "offset" = INT — offset relative to the base address of the component in the memory
+* "stride" = INT — for multiple registers, space between registers in memory
+* "label" = expr — expression resulting in a string to build the name of the register (for multiple register, with a particular index in "I")
+* "on_write" = "{" stmt "}" — code called when the register is written by a memory access (value in "X", index in "I" for multiple register)
+* "on_read" = "{" stmt "}" — code called when the register is read by a memory access (value must be written in "X", index in "I" for multiple register)
+* "access" = STRING — one of "write-only", "read-only", "private" or "read-write" (default)
+* "init" = expr — initial value (for multiple register, called for each register instance with index in "I")
+* "display" = expr — return a string representing the value of the register (index in "I" for multiple register)
+* "read_only" = expr -- if evaluates to non-zero, register is read-only
+* "write_only" = expr -- if evaluates to non-zero, register is write-only
+
+===== Port Attributes =====
+
+* "label" = expr — expression resulting in a string to build the name of the port (for multiple port, with a particular index in "I").
+* "on_change" = "{" stmt* "}" — code called when the state of the port changes (value in "X", index in "I").
+* "on_invalid" = "{" stmt* "}"— code called when the input is invalid -- not as requested (index in "I").
+* "master" = 0|1 — only for ports of type clock, if 1, used as the default clock of the component.
+* "unit" = STRING — only for ports of type float, physical unit transiting on the port.
+* "frequency" = expr — only for ports of type clock, this port is considered at outputting a clock at the given frequency
+* "serial" = 0|1 -- declare a serial port
+* "voltage" = 0|1 -- declare a voltage port
+
+===== Event Attributes =====
+
+* ''action'' -- action to run when the event is triggered.
+
+
+===== Connection work =====
+
+Each port is identified by a port type that may be:
+  * electric,
+  * physics/unit with unit a registered unit type.
+
+Two ports can only be connected if they are of the same type.
+
+A port can only be connected to one another port. If more than one connection is needed,
+a special bus component must be used.
+
+Physics port supports a value representing some physics unit.
+
+With electric connection, different kinds of data item can be transportd:
+  * digital -- 0 or 1 (more common, card(1) or int(1))
+  * serial -- character of 7 or 8-bit (serial connection)
+  * clock -- clocked pulses defined by their frequency (system or other clocks)
+  * voltage -- produced by a DAC (output) or received by an ADC (input)
+
+The port works based on events raised when the value of a port changes.
+
+There are two kinds of bus component:
+  * electric bus,
+  * physics bus.
+
+Let an electric bus with n ports P1, ..., Pn:
+  * if there is no output port, the value of ports P1, ..., Pn is defined by the parameter "default_none",
+  * if there is exactly one output port Pi, the input of ports P1 to Pn except Pi is this value",
+  * if there is more than one output port, the inputs of other ports is defined by the parameter "default_multi".
+
+Let a physics bus with n ports P1, ..., Pn. At any time, there are some ports that performs output, P1, ..., Pm
+and the other performing input, Pm+1, ..., Pn.
+
+Let the value outputted by output port be V1, ..., Vm and the total:
+	Vout = V1 + V2 + ... + Vm
+
+Let a weight associated with each port, W1, ..., Wn and the sum of weights:
+	Wout = Wm+1 + Wm+2 + ... + Wn
+
+The power received by an input port Pi (p < i <= n) is:
+	Vi = Vout * Wi / Wout
+
+
+
